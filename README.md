@@ -1,6 +1,3 @@
-salvadorPS2 -- a fast, near-optimal compressor for the ZX0 format
-===============================================================
-
 salvadorPS2 is a command-line tool that compresses PlayStation 2 executable files.
 It's specially suited for small files like 4k intros.
 
