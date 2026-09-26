@@ -1,4 +1,4 @@
-salvadorPS2 is a command-line tool that compresses PlayStation 2 executable files.
+salvadorPS2 is a command-line tool that compresses PlayStation 2 executable files.<br>
 It's specially suited for small files like 4k intros.
 
 It's based on salvador by Emmanuel Marty (https://github.com/emmanuel-marty/salvador).
