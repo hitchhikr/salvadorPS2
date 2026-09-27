@@ -47,7 +47,7 @@
 #define OPT_CLASSIC        8
 
 #define TOOL_VERSION "1.4.2"
-#define PS2_VERSION "1.0"
+#define PS2_VERSION "1.1"
 
 /*---------------------------------------------------------------------------*/
 
@@ -148,12 +148,14 @@ static int do_compress(const char *pszInFilename, const char *pszOutFilename, co
 
    if(!Check_ELF(pDecompressedData))
    {
+      free(pDecompressedData);
       printf("\nInput is not a valid PS2 ELF file\n");
       return 100;
    }
    pParsedData = Parse_ELF(pDecompressedData, (int) nOriginalSize);
    if(pParsedData == NULL)
    {
+      free(pDecompressedData);
       printf("\nCorrupted ELF file\n");
       return 100;
    }
@@ -241,26 +243,28 @@ static int do_compress(const char *pszInFilename, const char *pszOutFilename, co
    Section_Header.offset = 0x50;
    Section_Header.vaddr = File_Header.entry;
    Section_Header.paddr = File_Header.entry;
-   // TODO: add depacker size
    Section_Header.filesz = (u32) nCompressedSize + size_zx0_bin;
    Section_Header.memsz = Section_Header.filesz;
    Section_Header.flags = PF_X | PF_W | PF_R;
+
    Depacking_Source = size_zx0_bin + File_Header.entry;
    Depacking_Dest = Get_ELF_Base_Address();
+   // Construct a jump opcode
    Depacked_Entry = (Get_ELF_Entry_Point() >> 2) | 0x8000000;
+
    // Fix the addresses
    zx0_bin[1] = (Depacking_Source & 0xff000000) >> 24;
    zx0_bin[0] = (Depacking_Source & 0x00ff0000) >> 16;
    zx0_bin[5] = (Depacking_Source & 0x0000ff00) >> 8;
-   zx0_bin[4] = Depacking_Source & 0x000000ff;
+   zx0_bin[4] = (Depacking_Source & 0x000000ff);
    
    zx0_bin[9] = (Depacking_Dest & 0xff000000) >> 24;
    zx0_bin[8] = (Depacking_Dest & 0x00ff0000) >> 16;
    zx0_bin[13] = (Depacking_Dest & 0x0000ff00) >> 8;
-   zx0_bin[12] = Depacking_Dest & 0x000000ff;
+   zx0_bin[12] = (Depacking_Dest & 0x000000ff);
 
-   // Caution: Dependant on the depacker code size !!!
-   zx0_bin[0xdc] = Depacked_Entry & 0x000000ff;
+   // Caution: 0xdc is dependant on the depacker code size !!!
+   zx0_bin[0xdc] = (Depacked_Entry & 0x000000ff);
    zx0_bin[0xdc + 1] = (Depacked_Entry & 0x0000ff00) >> 8;
    zx0_bin[0xdc + 2] = (Depacked_Entry & 0x00ff0000) >> 16;
    zx0_bin[0xdc + 3] = (Depacked_Entry & 0xff000000) >> 24;

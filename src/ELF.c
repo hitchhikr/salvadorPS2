@@ -11,7 +11,11 @@
 
 // --------------------------------------------
 // Variables
+#ifdef _BIG_ENDIAN_
+u32 ELF_MAGIC = 0x7f454c46;
+#else
 u32 ELF_MAGIC = 0x464c457f;
+#endif
 
 elf_header_t *eh;
 elf_pheader_t *eph;
